@@ -21,3 +21,13 @@ class Utility:
         with open(f'qrcodes/{one_address}.png', 'wb') as f:
             img.save(f)
         return f'qrcodes/{one_address}.png'
+    
+    @classmethod
+    def is_valid_amount(self, value):
+        try:
+            float(value)
+            if float(value) <= 0.00000000:
+                return False
+            return True
+        except:
+            return False
