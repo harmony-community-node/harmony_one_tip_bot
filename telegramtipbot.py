@@ -3,6 +3,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Conversa
 import time, sys, signal
 import logging
 import json
+import requests
 from secretes import Secretes
 from datastore import DataStore
 from hmyclient import HmyClient
@@ -30,6 +31,7 @@ class OneTipTelegramBot:
         ['\U0001f916 Menu'],
     ]
     transfer_date = {}
+    bot_name = "@Dev_One_Tip_Bot"
 
     def __init__(self):
 
@@ -107,8 +109,8 @@ class OneTipTelegramBot:
                         }
                         self.dataStore.saveUserDetails(user_data)
                         context.bot.send_message(text=f'Welcome aboard {sender.full_name}, you are successfully registered!', chat_id=self.message.chat.id)
-                        context.bot.send_message(text=f'Your Deposite address {one_address}', chat_id=self.message.chat.id)
-                        context.bot.send_photo(caption="Your Deposite address", chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
+                        context.bot.send_message(text=f'Your Deposit address {one_address}', chat_id=self.message.chat.id)
+                        context.bot.send_photo(chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
                     else:
                         context.bot.send_message(text='Registration failed! due to error in wallet generation', chat_id=self.message.chat.id)
                 else:
@@ -123,7 +125,7 @@ class OneTipTelegramBot:
         finally:
             self.send_menu(update, context)
 
-    # When someone wants to deposite one to his account
+    # When someone wants to deposit one to his account
     def deposit(self, update, context):
         try:
             sender = self.message.from_user
@@ -131,10 +133,10 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                context.bot.send_message(text=f'Your Deposite address {one_address}', chat_id=self.message.chat.id)
-                context.bot.send_photo(caption="Your Deposite address", chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
+                context.bot.send_message(text=f'Your Deposit address {one_address}', chat_id=self.message.chat.id)
+                context.bot.send_photo(chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to deposite ONE', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered!, please register to deposit ONE', chat_id=self.message.chat.id)
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
         except Exception as ex:
@@ -143,7 +145,7 @@ class OneTipTelegramBot:
         finally:
             self.send_menu(update, context)
 
-    # When someone wants to deposite one to his account
+    # When someone wants to deposit one to his account
     def balance(self, update, context):
         try:
             sender = self.message.from_user
@@ -225,15 +227,18 @@ class OneTipTelegramBot:
         self.send_menu(update, context)
 
     def start(self, update, context):
-        self.message = update.message
-        self.pp.update_chat_data(self.message.chat.id, context.chat_data)
-        context.bot.send_message(chat_id = self.message.chat.id, text = "Welcome to Harmony ONE tipping bot", reply_markup = self.markup)
-        self.send_menu(update, context)
+        if update.message.chat.type == "private":
+            self.message = update.message
+            self.pp.update_chat_data(self.message.chat.id, context.chat_data)
+            context.bot.send_message(chat_id = self.message.chat.id, text = "Welcome to Harmony ONE tipping bot", reply_markup = self.markup)
+            self.send_menu(update, context)
+        else:
+            self.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
+
 
     def get_address(self, update, context):
         user_data = context.user_data
         text = update.message.text
-
 
         if HmyClient.validateONEAdress(text) :
             user_data['to_address'] = text
@@ -291,15 +296,16 @@ class OneTipTelegramBot:
         return ConversationHandler.END
 
     def tip(self, update, context, *args):
-        try:
+        #try:
+        reply = update.message.reply_to_message
+        sender_details = self.dataStore.getUserDetails(update.message.from_user.id, update.message.from_user.username)
+        if sender_details != None:
+            from_address = sender_details['one_address']
+            # If the sender isn't in the database, there's no way they have money
             reply = update.message.reply_to_message
-            sender_details = self.dataStore.getUserDetails(update.message.from_user.id, update.message.from_user.username)
-            if sender_details != None:
-                from_address = sender_details['one_address']
-                # If the sender isn't in the database, there's no way they have money
-                reply = update.message.reply_to_message
-                # These IDs will be used to look up the two people in the database
-                sender = update.message.from_user.id
+            # These IDs will be used to look up the two people in the database
+            sender = update.message.from_user.id
+            if reply != None:
                 receiver = reply.from_user.id
                 # Can't tip yourself
                 if sender != receiver:
@@ -311,9 +317,10 @@ class OneTipTelegramBot:
                         update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
                     else:
                         receiver_details = self.dataStore.getUserDetails(reply.from_user.id, reply.from_user.username)
+                        new_account = False
                         if receiver_details == None:
                             # Unregistered users get this and they will be registered automatically
-                            new_one_address = HmyClient.regiterNewUser(sender.username)
+                            new_one_address = HmyClient.regiterNewUser(reply.from_user.username)
                             parts = new_one_address.split('\n')
                             if len(parts) > 3:
                                 if parts[3].startswith('ONE Address:'):
@@ -326,19 +333,32 @@ class OneTipTelegramBot:
                                         'seed' : parts[2],
                                         'one_address' : to_address
                                     }
+                                    new_account = True
                                     self.dataStore.saveUserDetails(receiver_details)
                         if 'one_address' in receiver_details:
                             res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
                             res = eval(res)
                             if 'transaction-hash' in res:
-                                update.message.reply_text(f"Hi {reply.from_user.username}, {update.message.from_user.username} just tipped you {tip} ONE")
+                                if new_account :
+                                    update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} has tip you {tip}, but seems your account is not active with us yet.\n Please click here {self.bot_name} to initiate your account and check your balance!")
+                                else:
+                                    update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} just tipped you {tip} ONE")
                             else:
                                 print(f"Tip failed from  {update.message.from_user.username} to {reply.from_user.username} tip {tip} ONE")
                 else:
                     update.message.reply_text('You can\'t tip yourself!')
+            else:
+                update.message.reply_text('Please reply to a message to tip.')    
+                
         # This means the message doesn't contain a reply, which is required for the command
-        except AttributeError as ae:
-            print(ae)
-            update.message.reply_text('You must be replying to a message to tip someone!')
+        #except AttributeError as ae:
+        #    print(ae)
+        #    update.message.reply_text('You must be replying to a message to tip someone!')
         self.pp.update_chat_data(update.message.chat.id, context.chat_data)
+    
+    def delete_message(self, chat_id, message_id):
+        url = f'https://api.telegram.org/bot{Secretes._telegram_bot_key}/deleteMessage?chat_id={chat_id}&message_id={message_id}'
+        r = requests.get(url = url) 
+        data = r.json() 
+        print(data)
 
