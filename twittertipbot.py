@@ -54,26 +54,29 @@ class TipBotMessageListener(tweepy.StreamListener):
                             # Can't tip more than you have
                             from_balance = HmyClient.getBalace(from_address)
                             if tip + 0.00000021 > from_balance:
-                                reply_text = f'Sorry, your balance is low! tip {tip}'
+                                reply_text = f'@{status.user.screen_name}, your balance is low to tip {tip} ONE'
                             else:
                                 receiver_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{receiver}')
                                 if receiver_details == None:
-                                    reply_text = f"{receiver} is not registered with ONE Tipping bot, please register using Telegram bot (https://t.me/onetipbot)"
-                                if 'one_address' in receiver_details:
-                                    res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
-                                    res = eval(res)
-                                    if 'transaction-hash' in res:
-                                        reply_text = f"Hi @{receiver}, @{status.user.screen_name} just tipped you {tip} ONE"
+                                    reply_text = f"@{status.user.screen_name}, @{receiver} is not registered with ONE Tipping bot, please register using Telegram bot (https://t.me/onetipbot)"
+                                else:
+                                    if 'one_address' in receiver_details:
+                                        res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
+                                        res = eval(res)
+                                        if 'transaction-hash' in res:
+                                            reply_text = f"Hi @{receiver}, @{status.user.screen_name} just tipped you {tip} ONE"
+                                        else:
+                                            print(f"Tip failed from  {sender} to {receiver} tip {tip} ONE")
                                     else:
-                                        print(f"Tip failed from  {sender} to {receiver} tip {tip} ONE")
+                                        print('Receiver ONE address is missing')
                         else:
-                            reply_text = 'You can\'t tip yourself!'
+                            reply_text = f'@{status.user.screen_name} You can\'t tip yourself!'
                     else:
-                        reply_text = 'Please reply to a message to tip.'
+                        reply_text = f'@{status.user.screen_name} Please mention a receiver to tip.'
                 else:
                     success = "no"
                     failure_reason = "account does not exists"
-                    reply_text = failure_reason
+                    reply_text = f'@{status.user.screen_name} You are not registered with ONE Tipping bot, please register using Telegram bot (https://t.me/onetipbot).'
                 if reply_text != "":
                     self.api.update_status(status = reply_text, in_reply_to_status_id = status.id_str)
                     print(reply_text)
