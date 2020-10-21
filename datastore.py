@@ -6,6 +6,7 @@ class DataStore:
     client = None
     db = None
     usersData = u'usersData'
+    tweetData = u'tweetData'
 
     def __init__(self):   
         self.client = MongoClient()
@@ -18,6 +19,13 @@ class DataStore:
             return True
         else:
             return False
+    def checkIfUserRecordExistsWithTwitter(self, twitter_handle):
+        userDataCollection = self.db.usersData
+        doc_ref = userDataCollection.find({'twitter_handle': twitter_handle})
+        if doc_ref.count() > 0:
+            return True
+        else:
+            return False            
 
     def saveUserDetails(self, userDetails):
         if 'chat_id' in userDetails and 'telegram_user_id' in userDetails:
@@ -28,9 +36,7 @@ class DataStore:
                 userDataCollection.insert_one(userDetails)
             else:
                 #print(f"update {addressData}")
-                for doc in doc_ref:
-                    print(doc.id)
-                    userDataCollection.update({ "$and" : [{'chat_id' : userDetails['chat_id']}, {'telegram_user_id': userDetails['telegram_user_id']}]}, userDetails)
+                userDataCollection.update({ "$and" : [{'chat_id' : userDetails['chat_id']}, {'telegram_user_id': userDetails['telegram_user_id']}]}, userDetails)
 
     def getUserDetails(self, chat_id, telegram_user_id):
         userDataCollection = self.db.usersData
@@ -39,3 +45,39 @@ class DataStore:
             return None
         else:
             return doc_ref[0]
+    
+    def getUserDetailsByTwitterHandle(self, twitter_handle):
+        userDataCollection = self.db.usersData
+        doc_ref = userDataCollection.find({'twitter_handle': twitter_handle})
+        if doc_ref.count() == 0:
+            return None
+        else:
+            return doc_ref[0]
+    
+    def checkIftweetDataExists(self, tweet_id):
+        tweetDataCollection = self.db.tweetData
+        doc_ref = tweetDataCollection.find({'tweet_id': tweet_id})
+        if doc_ref.count() > 0:
+            return True
+        else:
+            return False
+
+    def getTweetDetails(self, tweet_id):
+        tweetDataCollection = self.db.tweetData
+        doc_ref = tweetDataCollection.find({'tweet_id': tweet_id})
+        if doc_ref.count() == 0:
+            return None
+        else:
+            return doc_ref[0]             
+
+    def saveTweetDetails(self, tweetDetails):
+        if 'tweet_id' in tweetDetails:
+            tweet_id = tweetDetails['tweet_id']
+            tweetDataCollection = self.db.tweetData
+            doc_ref = tweetDataCollection.find({'tweet_id': tweet_id})
+            if doc_ref.count() == 0:
+                print(f" tweet add {tweetDetails}")
+                tweetDataCollection.insert_one(tweetDetails)
+            else:
+                print(f" tweet update {tweetDetails}")
+                tweetDataCollection.update({'tweet_id': tweet_id}, tweetDetails)

@@ -1,10 +1,8 @@
 from telegramtipbot import OneTipTelegramBot
-from twittertipbot  import TwitterTipBot
 
 def main():
-    oneTipTelegramBot = OneTipTelegramBot()
-    #twitterTipBot = TwitterTipBot()
-
+   oneTipTelegramBot = OneTipTelegramBot()
+   oneTipTelegramBot.getLatestMessage()
 
 if __name__ == '__main__':
     main()
