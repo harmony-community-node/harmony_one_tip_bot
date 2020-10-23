@@ -6,6 +6,6 @@ tipbot
 tipbot1
 tipbot.py
 qrcodes
-twitter_autohook.js
 autohook.txt
 secretes.js
+node_modules/
