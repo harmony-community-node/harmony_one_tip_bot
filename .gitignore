@@ -1,6 +1,5 @@
 secretes.py
-__pychache__
-/__pychache__
+__pychache__/
 ONE_Tip_Bot.pdf
 tipbot
 tipbot1
@@ -9,3 +8,4 @@ qrcodes
 autohook.txt
 secretes.js
 node_modules/
+package-lock.json
