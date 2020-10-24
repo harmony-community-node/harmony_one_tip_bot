@@ -6,9 +6,11 @@ Following dendencies needs to be installed for running this bot.
 
 ## Python
 > pip3 install pyhmy
+
 > pip3 install pymongo
 
 
 ## Node 
 > sudo npm install twitter-autohook --save
+
 > sudo npm install mongoose
