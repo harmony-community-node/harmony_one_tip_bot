@@ -89,7 +89,7 @@ class DataStore:
         if doc_ref.count() == 0:
             return None
         else:
-            return doc_ref[2]
+            return doc_ref[0]
         
     def saveTwitterEventDetails(self, event_id, addressed):
         twitterEventDataCollection = self.db.twitter_events

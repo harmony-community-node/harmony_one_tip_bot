@@ -15,6 +15,7 @@ class TwitterTipBot():
     twitter_uid = "1190625904717959169"
     bot_twitter_handle = "prarysoft"
     dataStore = None
+    explorer_url = 'https://explorer.pops.one/#' #'https://explorer.harmony.one/#'
 
     def __init__( self ):
         try:
@@ -29,17 +30,61 @@ class TwitterTipBot():
 
     def startTwitterTipBot(self):
         while 1:
-            try:
-                twitter_event_details = self.dataStore.getNotAddressedTwitterEvents()
-                text = twitter_event_details['event_text']
-                print(twitter_event_details)
-                if text.startswith(f'@{self.bot_twitter_handle} !tip'):
-                    self.process_tip(twitter_event_details['event_id'], text, twitter_event_details['sender_handle'], twitter_event_details['receiver_handle'])
-                    break
-            except Exception as ex:
-                print(ex)
-            sleep(5)
-            
+            twitter_event_details = self.dataStore.getNotAddressedTwitterEvents()
+            if twitter_event_details != None:
+                try:
+                    text = twitter_event_details['event_text']
+                    if text.startswith(f'@{self.bot_twitter_handle} !tip'):
+                        self.process_tip(twitter_event_details['event_id'], text, twitter_event_details['sender_handle'], twitter_event_details['receiver_handle'])
+                    elif text == '!history':
+                        self.history(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
+                    elif text == '!help':
+                        self.help(twitter_event_details['sender_id'])
+                    elif text == '!balance':
+                        self.balance(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])                    
+                except Exception as ex:
+                    print(ex)
+                finally:
+                    if 'event_id' in twitter_event_details:
+                        self.dataStore.saveTwitterEventDetails(twitter_event_details['event_id'], True)
+            sleep(10)
+
+    # When someone wants to deposit one to his account
+    def balance(self, sender_handle, sender_id):
+        try:
+            # If they're not registered nor have they received any tips without an account
+            user_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
+            if user_details != None:
+                one_address = user_details['one_address']
+                balance = HmyClient.getBalace(one_address)
+                self.api.send_direct_message(text=f'Your Wallet Balace \n{balance}', recipient_id=sender_id)
+            else:
+                self.api.send_direct_message(text=f'Your Wallet Balace \n{balance}', recipient_id=sender_id)
+            # Save the data
+        except Exception as ex:
+            print(ex)
+
+    # When someone wants to see the History of his account
+    def history(self, sender_handle, sender_id):
+        try:
+            # If they're not registered nor have they received any tips without an account
+            user_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
+            if user_details != None:
+                one_address = user_details['one_address']
+                self.api.send_direct_message(text=f'Account History\n{self.explorer_url}/address/{one_address}', recipient_id=sender_id)
+            else:
+                self.api.send_direct_message(text=f'You\'re not registered!, please register to get Account History please register using Telegram bot (https://t.me/onetipbot)', recipient_id=sender_id)                
+        except Exception as ex:
+            print(ex)
+
+    def help(self, sender_id):
+        try:
+            help_text = u"Deposit \n----------------\n\nTo get started using Telegram bot (https://t.me/onetipbot) you need to deposit funds to your address. DM \" !deposite\" to to find your deposit address.\n\n\nWithdraw\n----------------\n\nTo Withdraw funds from your @OneTipBot you need to send \"!withdraw <amount> <one_address>\" Make sure you have enough balance to cover the network fees and your withdrawal amount.\n\n\nTip\n-----------------\n\nYou can tip anyone by Tweeting @OneTipBot !tip <tip_amount> <receivers_handle> \n\n\nRegister/Update Twitter handle\n-----------------\n\n\nTo register or update your Twitter handle you need to user our Telegram bot @OneTipBot at (https://t.me/onetipbot) then click on \"Register twitter handle/update twitter handle\". Follow the prompts and you will be able to register/update your twitter handle.\n\n\nDisclaimer\n-----------------\n\nPrivate keys are managed by @OneTipBot and securely stored. The bot uses the private key to create transactions on your behalf via telegram bot. It is not recommended to store large quantities of your crypto on @OneTipBot."
+            self.api.send_direct_message(text=help_text, recipient_id=sender_id)
+        except Exception as ex:
+            print(ex)
+        
+
     def process_tip(self, tweet_id, text, sender_handle, receiver):
         tip = 0
         success = "yes"

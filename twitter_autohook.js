@@ -7,7 +7,9 @@ var twitter_events = new Schema({
   event_id: String,
   event_text: String,
   sender_handle: String,
+  sender_id: String,
   receiver_handle: String,
+  receiver_id: String,
   event_type: String,
   addressed: Boolean
 }, {
@@ -39,8 +41,11 @@ const botHandle = "@prarysoft";
     var event_text = '';
     var addEvent = false;
     var sender_handle = '';
+    var sender_id = '';
     var receiver_handle = '';
+    var receiver_id = '';
     var event_type = '';
+    
     if (event.hasOwnProperty('tweet_create_events')) {
       if (event['tweet_create_events'].length > 0) {
         var tweet = event['tweet_create_events'][0];
@@ -67,10 +72,17 @@ const botHandle = "@prarysoft";
         var message = event['direct_message_events'][0];
         if (message != null) {
           event_text = message['message_create']['message_data']['text'];
-          if ((event_text == "!balance") || (event_text == "!withdraw") || (event_text == "!help")) {
+          var senderTwitterId = message['message_create']['sender_id'];
+          if ((event_text == "!balance") || (event_text == "!withdraw") || (event_text == "!help") || (event_text == "!history")) {
             addEvent = true;
             event_type = 'DM';
             event_id = message['id'];
+            if(event.hasOwnProperty('users')){
+              if(event['users'].hasOwnProperty(senderTwitterId)) {
+                sender_handle = event['users'][senderTwitterId]['screen_name'];
+                sender_id = event['users'][senderTwitterId]['id'];
+              }
+            }
           }
         }
       }
@@ -81,7 +93,9 @@ const botHandle = "@prarysoft";
         'event_id': event_id,
         'event_text': event_text,
         'sender_handle': sender_handle,
+        'sender_id': sender_id,
         'receiver_handle': receiver_handle,
+        'receiver_id': receiver_id,
         'event_type': event_type,
         'addressed': false // Time of save the data in unix timestamp format
       }).save(function (err, result) {

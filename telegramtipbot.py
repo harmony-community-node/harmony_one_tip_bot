@@ -83,23 +83,6 @@ class OneTipTelegramBot:
         )
         self.dp.add_handler(conv_handler)
 
-        twitter_conv_handler = ConversationHandler(
-        entry_points=[CallbackQueryHandler(self.register_twitter, pattern='^twitter$')],
-        states={
-            self.GET_HANDLE: [
-                MessageHandler(Filters.text, self.get_handle),
-            ],
-            self.CONFIRM_HANDLE: [
-                MessageHandler(Filters.text, self.confirm_handle)
-            ],
-            self.CANCEL_HANDLE: [
-                MessageHandler(Filters.text, self.cacel_handle)
-            ],
-        },
-            fallbacks=[MessageHandler(Filters.regex('^start$'), self.send_menu)],
-        )
-        #self.dp.add_handler(twitter_conv_handler)        
-
         # Start the Bot
         self.upd.start_polling()
 
