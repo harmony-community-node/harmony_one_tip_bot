@@ -97,5 +97,4 @@ class DataStore:
         if doc_ref.count() == 0:
             print(f" twitter event not found add")
         else:
-            print(f" twitter event update ")
             twitterEventDataCollection.update({'event_id': event_id}, {'addressed' : addressed})

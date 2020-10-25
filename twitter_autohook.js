@@ -73,7 +73,7 @@ const botHandle = "@prarysoft";
         if (message != null) {
           event_text = message['message_create']['message_data']['text'];
           var senderTwitterId = message['message_create']['sender_id'];
-          if ((event_text == "!balance") || (event_text == "!withdraw") || (event_text == "!help") || (event_text == "!history")) {
+          if ((event_text == "!balance") || (event_text.startsWith("!withdraw")) || (event_text == "!help") || (event_text == "!history") || (event_text == "!deposit")) {
             addEvent = true;
             event_type = 'DM';
             event_id = message['id'];
