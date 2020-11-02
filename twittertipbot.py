@@ -35,7 +35,7 @@ class TwitterTipBot():
             if twitter_event_details != None:
                 try:
                     text = twitter_event_details['event_text']
-                    if text.startswith(f'@{self.bot_twitter_handle} !tip'):
+                    if f'@{self.bot_twitter_handle} !tip' in text:
                         self.process_tip(twitter_event_details['event_id'], text, twitter_event_details['sender_handle'], twitter_event_details['receiver_handle'])
                     elif text == '!history':
                         self.history(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
@@ -51,7 +51,8 @@ class TwitterTipBot():
                     print(ex)
                 finally:
                     if 'event_id' in twitter_event_details:
-                        self.dataStore.saveTwitterEventDetails(twitter_event_details['event_id'], True)
+                        twitter_event_details['addressed'] = True
+                        self.dataStore.saveTwitterEventDetails(twitter_event_details)
             sleep(10)
 
     # When someone wants to deposit one to his account
@@ -162,7 +163,9 @@ class TwitterTipBot():
         failure_reason = ""
         tweet_type = "tweet"
         reply_text = ""
-        if text.startswith(f'@{self.bot_twitter_handle} !tip'):
+        print(text)
+        print(f'@{self.bot_twitter_handle} !tip')
+        if f'@{self.bot_twitter_handle} !tip' in text:
             if not self.dataStore.checkIftweetDataExists(tweet_id): 
                 sender_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
                 if sender_details != None:

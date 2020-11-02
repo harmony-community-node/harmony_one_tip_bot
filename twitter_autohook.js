@@ -45,23 +45,26 @@ const botHandle = "@prarysoft";
     var receiver_handle = '';
     var receiver_id = '';
     var event_type = '';
-    
+
     if (event.hasOwnProperty('tweet_create_events')) {
       if (event['tweet_create_events'].length > 0) {
         var tweet = event['tweet_create_events'][0];
         event_text = tweet['text'];
-        if (event_text.startsWith(botHandle + " !tip")) {
+        if (event_text.includes(botHandle + " !tip")) {
           addEvent = true;
           event_type = 'TIP';
           event_id = tweet['id_str'];
           sender_handle = tweet['user']['screen_name'];
-          for(var i = 0; i < tweet['entities']['user_mentions'].length; i++)
-          {
-            var user = tweet['entities']['user_mentions'][i];
-            if(botHandle != "@"+user['screen_name'])
-            {
-              receiver_handle = user['screen_name'];
-              break;
+          if (tweet.hasOwnProperty('in_reply_to_screen_name')) {
+            receiver_handle = tweet['in_reply_to_screen_name']
+          }
+          if (receiver_handle != "") {
+            for (var i = 0; i < tweet['entities']['user_mentions'].length; i++) {
+              var user = tweet['entities']['user_mentions'][i];
+              if (botHandle != "@" + user['screen_name']) {
+                receiver_handle = user['screen_name'];
+                break;
+              }
             }
           }
         }
@@ -77,8 +80,8 @@ const botHandle = "@prarysoft";
             addEvent = true;
             event_type = 'DM';
             event_id = message['id'];
-            if(event.hasOwnProperty('users')){
-              if(event['users'].hasOwnProperty(senderTwitterId)) {
+            if (event.hasOwnProperty('users')) {
+              if (event['users'].hasOwnProperty(senderTwitterId)) {
                 sender_handle = event['users'][senderTwitterId]['screen_name'];
                 sender_id = event['users'][senderTwitterId]['id'];
               }

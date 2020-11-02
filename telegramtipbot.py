@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, PicklePersistence, MessageHandler, Filters
+from telethon import TelegramClient, events, sync
 import time, sys, signal
 import logging
 import json
@@ -18,6 +19,7 @@ starting_bonus = 200
 
 class OneTipTelegramBot:
 
+    client = None
     pp = None
     upd = None
     dp = None
@@ -36,6 +38,11 @@ class OneTipTelegramBot:
 
         self.dataStore = DataStore()
 
+        #self.client = TelegramClient('ONE_TIP_BOT',
+        #                    Secretes._telegramApiId,
+        #                    Secretes._telegramApiHash)
+        #self.client.start()
+
         self.pp = PicklePersistence(filename='tipbot')
 
         self.upd = Updater(Secretes._telegram_bot_key, persistence = self.pp, use_context=True)
@@ -52,6 +59,7 @@ class OneTipTelegramBot:
         self.dp.add_handler(CallbackQueryHandler(self.history, pattern='^history$'))
         self.dp.add_handler(CallbackQueryHandler(self.deposit, pattern='^deposit$'))
         self.dp.add_handler(CommandHandler('tip', self.tip))
+        self.dp.add_handler(CommandHandler('airdrop', self.airdrop))
 
         
         conv_handler = ConversationHandler(
@@ -435,6 +443,93 @@ class OneTipTelegramBot:
             print(ae)
             update.message.reply_text('You must be replying to a message to tip someone!')
         self.pp.update_chat_data(update.message.chat.id, context.chat_data)
+    
+    def airdrop(self, update, context, *args):
+        self.getActiveChannelMembers(update.message.chat.id)
+        return
+        try:
+            reply = update.message.reply_to_message
+            sender_details = self.dataStore.getUserDetails(update.message.from_user.id, update.message.from_user.username)
+            if sender_details != None:
+                from_address = sender_details['one_address']
+                # If the sender isn't in the database, there's no way they have money
+                reply = update.message.reply_to_message
+                # These IDs will be used to look up the two people in the database
+                sender = update.message.from_user.id
+                if reply != None:
+                    receiver = reply.from_user.id
+                    # Can't tip yourself
+                    if sender != receiver:
+                        # The *args dict only stores strings, so we make it a number
+                        tip = float(context.args[0])				
+                        # Can't tip more than you have
+                        from_balance = HmyClient.getBalace(from_address)
+                        if tip + 0.00000021 > from_balance:
+                            update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
+                        else:
+                            receiver_details = self.dataStore.getUserDetails(reply.from_user.id, reply.from_user.username)
+                            new_account = False
+                            if receiver_details == None:
+                                # Unregistered users get this and they will be registered automatically
+                                new_one_address = HmyClient.regiterNewUser(reply.from_user.username)
+                                parts = new_one_address.split('\n')
+                                if len(parts) > 3:
+                                    if parts[3].startswith('ONE Address:'):
+                                        to_address = parts[3].replace('ONE Address: ', '')
+                                        receiver_details = {
+                                            'balance': 0,
+                                            'chat_id' : reply.from_user.id,
+                                            'telegram_user_id' : reply.from_user.username, 
+                                            'name': reply.from_user.full_name, 
+                                            'seed' : parts[2],
+                                            'one_address' : to_address
+                                        }
+                                        new_account = True
+                                        self.dataStore.saveUserDetails(receiver_details)
+                            if 'one_address' in receiver_details:
+                                res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
+                                res = eval(res)
+                                if 'transaction-hash' in res:
+                                    if new_account :
+                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} has tip you {tip}, but seems your account is not active with us yet.\n Please click here {self.bot_name} to initiate your account and check your balance!")
+                                    else:
+                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} just tipped you {tip} ONE")
+                                else:
+                                    print(f"Tip failed from  {update.message.from_user.username} to {reply.from_user.username} tip {tip} ONE")
+                    else:
+                        update.message.reply_text('You can\'t tip yourself!')
+                else:
+                    update.message.reply_text('Please reply to a message to tip.')    
+                    
+            # This means the message doesn't contain a reply, which is required for the command
+        except AttributeError as ae:
+            print(ae)
+            update.message.reply_text('You must be replying to a message to tip someone!')
+        self.pp.update_chat_data(update.message.chat.id, context.chat_data)
+    
+    async def getActiveChannelMembers(self, channel_username):
+        async with TelegramClient("session_name112", Secretes._telegramApiId, Secretes._telegramApiHash) as cli:
+            messages = await cli.get_messages(channel_username, limit=10)
+            for message in messages:
+                print(message.message)
+        '''channel_username = "DevOneTipBotChannel"
+        for message in self.client.get_messages(channel_username, limit=10):
+            print(message.message)
+        chats = self.client.get_messages(group_username, 100)
+        message_id =[]
+        message =[]
+        sender =[]
+        reply_to =[]
+        time = []
+        if len(chats):
+            for chat in chats:
+                message_id.append(chat.id)
+                message.append(chat.message)
+                sender.append(chat.from_id)
+                reply_to.append(chat.reply_to_msg_id)
+                time.append(chat.date)
+        data ={'message_id':message_id, 'message': message, 'sender_ID':sender, 'reply_to_msg_id':reply_to, 'time':time}
+        print(data)'''
     
     def delete_message(self, chat_id, message_id):
         url = f'https://api.telegram.org/bot{Secretes._telegram_bot_key}/deleteMessage?chat_id={chat_id}&message_id={message_id}'
