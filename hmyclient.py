@@ -17,7 +17,7 @@ class HmyClient:
         return cli.single_call(f'hmy transfer --node={HmyClient._networkUrl} --from {from_address} --to {to_address} --from-shard {from_shard} --to-shard {to_shard} --amount {amount}')
     
     @classmethod
-    def getBalace(self, one_address):
+    def getBalance(self, one_address):
         return account.get_balance(one_address, endpoint=HmyClient._networkUrl) / HmyClient._oneAmountDenominator
     
     @classmethod

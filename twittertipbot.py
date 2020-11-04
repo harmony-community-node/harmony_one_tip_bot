@@ -96,7 +96,7 @@ class TwitterTipBot():
                         print(reply_message)
                         inputInValid = True
                     else:
-                        if HmyClient.getBalace(from_address) + 0.00000021 < float(amount):
+                        if HmyClient.getBalance(from_address) + 0.00000021 < float(amount):
                             inputInValid = True
                             reply_message = f"Please make sure you have enough funds for transfer {amount} in your account including fees, please reduce the withdraw amount and try again."
                             print(reply_message)
@@ -128,8 +128,8 @@ class TwitterTipBot():
             user_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
             if user_details != None:
                 one_address = user_details['one_address']
-                balance = HmyClient.getBalace(one_address)
-                self.api.send_direct_message(text=f'Your Wallet Balace \n{balance}', recipient_id=sender_id)
+                balance = HmyClient.getBalance(one_address)
+                self.api.send_direct_message(text=f'Your Wallet Balance \n{balance}', recipient_id=sender_id)
             else:
                 self.api.send_direct_message(text=f'You\'re not registered!, please register to get balance please register using Telegram bot (https://t.me/onetipbot), if you are already registered please link you twitter handle.', recipient_id=sender_id)
             # Save the data
@@ -181,7 +181,7 @@ class TwitterTipBot():
                         # Can't tip yourself
                         if sender != receiver:                            				
                             # Can't tip more than you have
-                            from_balance = HmyClient.getBalace(from_address)
+                            from_balance = HmyClient.getBalance(from_address)
                             if tip + 0.00000021 > from_balance:
                                 reply_text = f'@{sender_handle}, your balance is low to tip {tip} ONE'
                             else:

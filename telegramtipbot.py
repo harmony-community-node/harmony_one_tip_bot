@@ -166,8 +166,8 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                balance = HmyClient.getBalace(one_address)
-                context.bot.send_message(text=f'Your Wallet Balace \n{balance}', chat_id=self.message.chat.id)
+                balance = HmyClient.getBalance(one_address)
+                context.bot.send_message(text=f'Your Wallet Balance \n{balance}', chat_id=self.message.chat.id)
             else:
                 context.bot.send_message(text='You\'re not registered!, please register to get ONE balance', chat_id=self.message.chat.id)
             # Save the data
@@ -279,10 +279,10 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                if HmyClient.getBalace(one_address) + 0.00000021 >= float(text):
+                if HmyClient.getBalance(one_address) + 0.00000021 >= float(text):
                     user_data['amount'] = text
                     user_data['from_address'] = one_address
-                    update.message.reply_text(f"Transferting {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer.")
+                    update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer.")
                     return self.CONFIRM_TRANSFER
                 else:
                     update.message.reply_text(f"Your current balance is lower than {text}, transfer cancelled")
@@ -400,7 +400,7 @@ class OneTipTelegramBot:
                         # The *args dict only stores strings, so we make it a number
                         tip = float(context.args[0])				
                         # Can't tip more than you have
-                        from_balance = HmyClient.getBalace(from_address)
+                        from_balance = HmyClient.getBalance(from_address)
                         if tip + 0.00000021 > from_balance:
                             update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
                         else:
@@ -463,7 +463,7 @@ class OneTipTelegramBot:
                         # The *args dict only stores strings, so we make it a number
                         tip = float(context.args[0])				
                         # Can't tip more than you have
-                        from_balance = HmyClient.getBalace(from_address)
+                        from_balance = HmyClient.getBalance(from_address)
                         if tip + 0.00000021 > from_balance:
                             update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
                         else:

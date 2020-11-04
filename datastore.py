@@ -91,10 +91,10 @@ class DataStore:
         else:
             return doc_ref[0]
         
-    def saveTwitterEventDetails(self, event_id, addressed):
+    def saveTwitterEventDetails(self, tweetEventDetails):
         twitterEventDataCollection = self.db.twitter_events
-        doc_ref = twitterEventDataCollection.find({'event_id': event_id})
+        doc_ref = twitterEventDataCollection.find({'event_id': tweetEventDetails['event_id']})
         if doc_ref.count() == 0:
             print(f" twitter event not found add")
         else:
-            twitterEventDataCollection.update({'event_id': event_id}, {'addressed' : addressed})
+            twitterEventDataCollection.update({'event_id': tweetEventDetails['event_id']}, tweetEventDetails)
