@@ -33,6 +33,8 @@ class OneTipTelegramBot:
     ]
     transfer_date = {}
     bot_name = "@Dev_One_Tip_Bot"
+    twitter_bot_name = "prarysoft" #"OneTipbot"
+    twitter_bot_handle = "prarysoft" #"OneTipBot"
 
     def __init__(self):
 
@@ -122,10 +124,10 @@ class OneTipTelegramBot:
                         }
                         self.dataStore.saveUserDetails(user_data)
                         context.bot.send_message(text=f'Welcome aboard {sender.full_name}, you are successfully registered!', chat_id=self.message.chat.id)
-                        context.bot.send_message(text=f'Your Deposit address {one_address}', chat_id=self.message.chat.id)
+                        context.bot.send_message(text=f'Your Deposit address is: {one_address}', chat_id=self.message.chat.id)
                         context.bot.send_photo(chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
                     else:
-                        context.bot.send_message(text='Registration failed! due to error in wallet generation', chat_id=self.message.chat.id)
+                        context.bot.send_message(text='Registration failed due to error in wallet generation!', chat_id=self.message.chat.id)
                 else:
                     context.bot.send_message(text='Registration failed!', chat_id=self.message.chat.id)
             else:
@@ -146,10 +148,10 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                context.bot.send_message(text=f'Your Deposit address {one_address}', chat_id=self.message.chat.id)
+                context.bot.send_message(text=f'Your Deposit address is: {one_address}', chat_id=self.message.chat.id)
                 context.bot.send_photo(chat_id=self.message.chat.id, photo=open(Utility.getQRCodeImageFilePath(one_address), 'rb'))
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to deposit ONE', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
         except Exception as ex:
@@ -166,10 +168,10 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                balance = HmyClient.getBalance(one_address)
-                context.bot.send_message(text=f'Your Wallet Balance \n{balance}', chat_id=self.message.chat.id)
+                balance = HmyClient.getBalace(one_address)
+                context.bot.send_message(text=f'Your Wallet Balance is: \n{balance}', chat_id=self.message.chat.id)
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to get ONE balance', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
         except Exception as ex:
@@ -186,9 +188,9 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                context.bot.send_message(text=f'Account History\n{self.explorer_url}/address/{one_address}', chat_id=self.message.chat.id)
+                context.bot.send_message(text=f'Account History: {self.explorer_url}/address/{one_address}', chat_id=self.message.chat.id)
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to get Account History', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
         except Exception as ex:
@@ -204,9 +206,9 @@ class OneTipTelegramBot:
             # If they're not registered nor have they received any tips without an account
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
-                context.bot.send_message(text=f'Please type the receiver address', chat_id=self.message.chat.id)
+                context.bot.send_message(text=f'Please type the receiver address:', chat_id=self.message.chat.id)
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to Deposit or Withdraw History', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
         except Exception as ex:
@@ -242,7 +244,7 @@ class OneTipTelegramBot:
         context.bot.send_message(text="Please select an option:", chat_id=self.message.chat.id, reply_markup=reply_markup)
 
     def help(self, update, context):
-        help_text = u"Deposit \n----------------\n\nTo get started using @OneTipBot you need to deposit funds to your address. Click on the \" Deposit\" button on the main menu to to find your deposit address.\n\n\nWithdraw\n----------------\n\nTo Withdraw funds from your @OneTipBot you need to click on the \"Withdraw\" button. Follow the prompts and you will be able to withdraw. Make sure you have enough balance to cover the network fees and your withdrawal amount.\n\n\nTip\n-----------------\n\nYou can tip anyone by replying messages using: /tip [AMOUNT]\n\n\nRegister/Update Twitter handle\n-----------------\n\n\nTo register or update your Twitter handle you need to click on \"Register twitter handle/update twitter handle\". Follow the prompts and you will be able to register/update your twitter handle.\n\n\nDisclaimer\n-----------------\n\nPrivate keys are managed by @OneTipBot and securely stored. The bot uses the private key to create transactions on your behalf via telegram bot. It is not recommended to store large quantities of your crypto on @OneTipBot."
+        help_text = u"Deposit \n----------------\n\nTo get started using @OneTipBot you need to deposit funds to your address. Click on the \"Deposit\" button on the main menu to to find your deposit address.\n\n\nWithdraw\n----------------\n\nTo Withdraw funds from your @OneTipBot you need to click on the \"Withdraw\" button. Follow the prompts and you will be able to withdraw. Make sure you have enough balance to cover the network fees and your withdrawal amount.\n\n\nTip\n-----------------\n\nYou can tip anyone by replying messages using: /tip [AMOUNT]\n\n\nRegister/Update Twitter handle\n-----------------\n\n\nTo register or update your Twitter handle you need to click on \"Register twitter handle/update twitter handle\". Follow the prompts and you will be able to register/update your twitter handle.\n\n\nDisclaimer\n-----------------\n\nPrivate keys are managed by @OneTipBot and securely stored. The bot uses the private key to create transactions on your behalf via telegram bot. It is not recommended to store large quantities of your crypto on @OneTipBot."
         context.bot.send_message(text=help_text, chat_id=self.message.chat.id)
         self.send_menu(update, context)
 
@@ -250,7 +252,7 @@ class OneTipTelegramBot:
         if update.message.chat.type == "private":
             self.message = update.message
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
-            context.bot.send_message(chat_id = self.message.chat.id, text = "Welcome to Harmony ONE tipping bot", reply_markup = self.markup)
+            context.bot.send_message(chat_id = self.message.chat.id, text = "Welcome to @OneTipBot", reply_markup = self.markup)
             self.send_menu(update, context)
         else:
             self.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
@@ -262,10 +264,10 @@ class OneTipTelegramBot:
 
         if HmyClient.validateONEAdress(text) :
             user_data['to_address'] = text
-            update.message.reply_text(f"Please enter how much you want to send it to {text}")
+            update.message.reply_text(f"Please enter how much you want to send to {text}")
             return self.GET_AMOUNT
         else:
-            update.message.reply_text("Invalid ONE address, transfer cancelled")
+            update.message.reply_text("Invalid ONE address, transfer cancelled!")
             user_data.clear()
             self.send_menu(update, context)
             return ConversationHandler.END
@@ -282,10 +284,10 @@ class OneTipTelegramBot:
                 if HmyClient.getBalance(one_address) + 0.00000021 >= float(text):
                     user_data['amount'] = text
                     user_data['from_address'] = one_address
-                    update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer.")
+                    update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer!")
                     return self.CONFIRM_TRANSFER
                 else:
-                    update.message.reply_text(f"Your current balance is lower than {text}, transfer cancelled")
+                    update.message.reply_text(f"Your current balance is lower than {text}, transfer cancelled!")
                     user_data.clear()
                     self.send_menu(update, context)
                     return ConversationHandler.END
@@ -303,11 +305,11 @@ class OneTipTelegramBot:
             res = HmyClient.transfer(user_data['from_address'], user_data['to_address'], user_data['amount'])
             res = eval(res)
             if 'transaction-hash' in res:
-                update.message.reply_text(f"Withdraw is complete, here is the receipt {self.explorer_url}/tx/{res['transaction-hash']}")
+                update.message.reply_text(f"Withdraw has been completed. Check here the receipt: {self.explorer_url}/tx/{res['transaction-hash']}")
             else:
-                update.message.reply_text("Withdraw is failed with unknown error")
+                update.message.reply_text("Withdraw has failed with an unknown error!")
         else:
-            update.message.reply_text("Withdraw is failed")
+            update.message.reply_text("Withdraw has failed!")
 
         user_data.clear()
         self.send_menu(update, context)
@@ -315,7 +317,7 @@ class OneTipTelegramBot:
 
     def cacel_transfer(self, update, context):
         user_data = context.user_data
-        update.message.reply_text("Cancelled the transaction")
+        update.message.reply_text("Transaction cancelled!")
         user_data.clear()
         self.send_menu(update, context)
         return ConversationHandler.END
@@ -327,15 +329,17 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 twitter_handle = ""
+                twitter_message = f"1. Follow {self.twitter_bot_name} on Twitter https://twitter.com/{self.twitter_bot_handle}\n\n2. Type your Twitter handle with “@” (e.g., @{self.twitter_bot_handle})\n\n3. Verify your ownership with a tweet\n\n4. You can send tips to users by replying their tweet with @{self.twitter_bot_handle} !tip [amount] (e.g., @{self.twitter_bot_handle} 10 to tip 10 ONE)"
+                context.bot.send_message(text=twitter_message, chat_id=self.message.chat.id)
                 if 'twitter_handle' in user_details:
                     twitter_handle = user_details['twitter_handle']
                 if twitter_handle == "":
-                    context.bot.send_message(text=f'Please type your twitter handle to register', chat_id=self.message.chat.id)
+                    context.bot.send_message(text=f'Please type your twitter handle to register:', chat_id=self.message.chat.id)
                 else:
-                    context.bot.send_message(text=f'{twitter_handle} is your current reigstered twitter handle,  please type your new twitter handle to update', chat_id=self.message.chat.id)
+                    context.bot.send_message(text=f'{twitter_handle} is your current reigstered twitter handle,  please type your new twitter handle to update:', chat_id=self.message.chat.id)
                 return self.GET_HANDLE
             else:
-                context.bot.send_message(text='You\'re not registered!, please register to update the twitter handle', chat_id=self.message.chat.id)
+                context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
                 return self.CANCEL_HANDLE
             # Save the data
             self.pp.update_chat_data(self.message.chat.id, context.chat_data)
@@ -349,11 +353,20 @@ class OneTipTelegramBot:
         text = update.message.text.replace("@", "")
 
         if text != "":
+            sender = self.message.from_user
+            user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             user_data['twitter_handle'] = text
-            update.message.reply_text(f"Would like to update your twitter handle to @{text}? Please type Yes/Y to confirm, any other input will cancel the update.")
-            return self.CONFIRM_HANDLE
+            context.bot.send_message(text=f"Your Twitter profile handler @{text}", chat_id=self.message.chat.id)
+            twitter_message = f"Now you need to verify the ownership of your Twitter account.\n\nSend a DM  '!verify {user_details['telegram_user_id']}' to '@{self.twitter_bot_handle}'\n\nThis process might take few moments (confirmation of ownership)"
+            context.bot.send_message(text=twitter_message, chat_id=self.message.chat.id)
+            user_details['twitter_handle'] = f'@{user_data["twitter_handle"]}'
+            user_details['twitter_handle_verified'] = False
+            self.dataStore.saveUserDetails(user_details)
+            user_data.clear()
+            self.send_menu(update, context)
+            return ConversationHandler.END
         else:
-            update.message.reply_text("Invalid input, twitter handle update cancelled")
+            update.message.reply_text("Invalid input, twitter handle update cancelled!")
             return self.CANCEL_HANDLE
 
     def confirm_handle(self, update, context):
@@ -366,11 +379,11 @@ class OneTipTelegramBot:
             if user_details != None:
                 user_details['twitter_handle'] = f'@{user_data["twitter_handle"]}'
                 self.dataStore.saveUserDetails(user_details)
-                update.message.reply_text(f"Your Twitter handle is udpated with @{user_data['twitter_handle']}")
+                update.message.reply_text(f"Your Twitter handle has been updated to @{user_data['twitter_handle']}")
             else:
-                update.message.reply_text("User not found, please register before updating the twitter handle")
+                update.message.reply_text("User not found, please register before updating the twitter handle!")
         else:
-            update.message.reply_text("twitter handle update cancelled")
+            update.message.reply_text("Twitter handle update cancelled!")
 
         user_data.clear()
         self.send_menu(update, context)
@@ -378,7 +391,7 @@ class OneTipTelegramBot:
 
     def cacel_handle(self, update, context):
         user_data = context.user_data
-        update.message.reply_text("Cancelled the twitter handle update")
+        update.message.reply_text("Twitter handle update cancelled!")
         user_data.clear()
         self.send_menu(update, context)
         return ConversationHandler.END

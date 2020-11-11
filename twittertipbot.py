@@ -46,7 +46,9 @@ class TwitterTipBot():
                     elif text.startswith("!withdraw"):
                         self.withdraw(text, twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
                     elif text.startswith("!deposit"):
-                        self.deposit(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])                        
+                        self.deposit(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
+                    elif text.startswith("!verify"):
+                        self.verify_twitter(text, twitter_event_details['sender_handle'], twitter_event_details['sender_id'])                                         
                 except Exception as ex:
                     print(ex)
                 finally:
@@ -169,39 +171,49 @@ class TwitterTipBot():
             if not self.dataStore.checkIftweetDataExists(tweet_id): 
                 sender_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
                 if sender_details != None:
-                    parts = text.split(" ")
-                    for i in range(0, len(parts)):
-                        if parts[i] == "!tip":
-                            if i + 1 < len(parts):
-                                tip = float(parts[i + 1])
-                                break
-                    from_address = sender_details['one_address']
-                    sender = sender_handle
-                    if receiver != "":
-                        # Can't tip yourself
-                        if sender != receiver:                            				
-                            # Can't tip more than you have
-                            from_balance = HmyClient.getBalance(from_address)
-                            if tip + 0.00000021 > from_balance:
-                                reply_text = f'@{sender_handle}, your balance is low to tip {tip} ONE'
-                            else:
-                                receiver_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{receiver}')
-                                if receiver_details == None:
-                                    reply_text = f"@{sender_handle}, @{receiver} is not registered with ONE Tipping bot, please register using Telegram bot (https://t.me/onetipbot)"
-                                else:
-                                    if 'one_address' in receiver_details:
-                                        res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
-                                        res = eval(res)
-                                        if 'transaction-hash' in res:
-                                            reply_text = f"Hi @{receiver}, @{sender_handle} just tipped you {tip} ONE"
-                                        else:
-                                            print(f"Tip failed from  {sender} to {receiver} tip {tip} ONE")
+                    if 'twitter_handle_verified' in sender_details:
+                        if sender_details['twitter_handle_verified'] == True:
+                            parts = text.split(" ")
+                            for i in range(0, len(parts)):
+                                if parts[i] == "!tip":
+                                    if i + 1 < len(parts):
+                                        tip = float(parts[i + 1])
+                                        break
+                            from_address = sender_details['one_address']
+                            sender = sender_handle
+                            if receiver != "":
+                                # Can't tip yourself
+                                if sender != receiver:                            				
+                                    # Can't tip more than you have
+                                    from_balance = HmyClient.getBalance(from_address)
+                                    if tip + 0.00000021 > from_balance:
+                                        reply_text = f'@{sender_handle}, your balance is low to tip {tip} ONE'
                                     else:
-                                        print('Receiver ONE address is missing')
+                                        receiver_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{receiver}')
+                                        if receiver_details == None:
+                                            reply_text = f"@{sender_handle}, @{receiver} is not registered with ONE Tipping bot, please register using Telegram bot (https://t.me/onetipbot)"
+                                        else:
+                                            if 'one_address' in receiver_details:
+                                                res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
+                                                res = eval(res)
+                                                if 'transaction-hash' in res:
+                                                    reply_text = f"Hi @{receiver}, @{sender_handle} just tipped you {tip} ONE"
+                                                else:
+                                                    print(f"Tip failed from  {sender} to {receiver} tip {tip} ONE")
+                                            else:
+                                                print('Receiver ONE address is missing')
+                                else:
+                                    reply_text = f'@{sender_handle} You can\'t tip yourself!'
+                            else:
+                                reply_text = f'@{sender_handle} Please mention a receiver to tip.'
                         else:
-                            reply_text = f'@{sender_handle} You can\'t tip yourself!'
+                            success = "no"
+                            failure_reason = "twitter account not verified"
+                            reply_text = f'@{sender_handle} Your twitter handle is not verified ONE Tipping bot, please verify using Telegram bot (https://t.me/onetipbot).'                            
                     else:
-                        reply_text = f'@{sender_handle} Please mention a receiver to tip.'
+                        success = "no"
+                        failure_reason = "twitter account not verified"
+                        reply_text = f'@{sender_handle} Your twitter handle is not verified ONE Tipping bot, please verify using Telegram bot (https://t.me/onetipbot).'                        
                 else:
                     success = "no"
                     failure_reason = "account does not exists"
@@ -225,7 +237,27 @@ class TwitterTipBot():
             else:
                 print("Tweet already served")
         else:
-            print("Not a Tipping tweet")            
+            print("Not a Tipping tweet")
+
+    def verify_twitter(self, text, sender_handle, sender_id):
+        parts = text.split(" ")
+        reply_message = ""
+        user_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{sender_handle}')
+        telegram_user_id = ""
+        if len(parts) == 2:
+            if parts[0] == "!verify":
+                telegram_user_id = parts[1]
+        if user_details != None:
+            if user_details['telegram_user_id'] == telegram_user_id:
+                reply_message = f"Congratulations! your twitter handle is verified and now you can start tip using @{self.bot_twitter_handle}"
+                user_details['twitter_handle_verified'] = True
+                self.dataStore.saveUserDetails(user_details)
+            else:
+                reply_message = f"Sorry! not able to verify your twitter handle, please retry using our telegram bot"
+        else:
+            reply_message = f"Sorry! not able to verify your twitter handle, please retry using our telegram bot"
+        
+        self.api.send_direct_message(text=reply_message, recipient_id=sender_id)
     
 twitterBot = TwitterTipBot()
 twitterBot.startTwitterTipBot()
