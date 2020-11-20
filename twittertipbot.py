@@ -48,7 +48,9 @@ class TwitterTipBot():
                     elif text.startswith("!deposit"):
                         self.deposit(twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
                     elif text.startswith("!verify"):
-                        self.verify_twitter(text, twitter_event_details['sender_handle'], twitter_event_details['sender_id'])                                         
+                        self.verify_twitter(text, twitter_event_details['sender_handle'], twitter_event_details['sender_id'])
+                    else:
+                        self.showerror(text, twitter_event_details['sender_id'])
                 except Exception as ex:
                     print(ex)
                 finally:
@@ -259,5 +261,9 @@ class TwitterTipBot():
         
         self.api.send_direct_message(text=reply_message, recipient_id=sender_id)
     
+    def showerror(self, text, sender_id):
+        reply_message = f"Sorry! command {text} not supported, please use !help get supported actions"
+        self.api.send_direct_message(text=reply_message, recipient_id=sender_id)
+
 twitterBot = TwitterTipBot()
 twitterBot.startTwitterTipBot()
