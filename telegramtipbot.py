@@ -168,7 +168,7 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                balance = HmyClient.getBalace(one_address)
+                balance = HmyClient.getBalance(one_address)
                 context.bot.send_message(text=f'Your Wallet Balance is: \n{balance}', chat_id=self.message.chat.id)
             else:
                 context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)

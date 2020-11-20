@@ -76,7 +76,7 @@ const botHandle = "@prarysoft";
         if (message != null) {
           event_text = message['message_create']['message_data']['text'];
           var senderTwitterId = message['message_create']['sender_id'];
-          if ((event_text == "!balance") || (event_text.startsWith("!withdraw")) || (event_text == "!help") || (event_text == "!history") || (event_text == "!deposit") || (event_text.startsWith("!verify"))) {
+          if (event_text.startsWith("!")) {
             addEvent = true;
             event_type = 'DM';
             event_id = message['id'];
@@ -87,11 +87,11 @@ const botHandle = "@prarysoft";
               }
             }
           }
+          
         }
       }
     }
     if (addEvent) {
-      console.log('Added event');
       var savedata = new Model({
         'event_id': event_id,
         'event_text': event_text,
@@ -103,12 +103,12 @@ const botHandle = "@prarysoft";
         'addressed': false // Time of save the data in unix timestamp format
       }).save(function (err, result) {
         if (result) {
-          //console.log(result);
+          console.log('Added event', event_text);
         }
       });
     }
     else {
-      console.log('Event Not Added:', event);
+      console.log('Event Not Added:', event_text);
     }
   });
 

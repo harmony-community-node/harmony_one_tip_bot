@@ -110,7 +110,9 @@ class TwitterTipBot():
                         inputInValid = True        
                         reply_message = "Invalid ONE address, transfer cancelled!"
                         print(reply_message)
-
+        else:
+            inputInValid = True        
+            reply_message = "Invalid withdraw command, please use !help get help"
         if not inputInValid:
             res = HmyClient.transfer(from_address, withdraw_address, amount)
             res = eval(res)
@@ -265,5 +267,3 @@ class TwitterTipBot():
         reply_message = f"Sorry! command {text} not supported, please use !help get supported actions"
         self.api.send_direct_message(text=reply_message, recipient_id=sender_id)
 
-twitterBot = TwitterTipBot()
-twitterBot.startTwitterTipBot()
