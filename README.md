@@ -41,13 +41,13 @@ Please check following link for more detail on Twitter Autohook
 > sudo npm install mongoose
 
 ## Running the Bot
-> tmux new -s python
+> tmux new-session -s python
 
 > python3 onetipbot.py
 
 > Ctrl-B and D
 
-> tmux new -s node
+> tmux new-session -s node
 
 > node twitter_autohook.js
 
