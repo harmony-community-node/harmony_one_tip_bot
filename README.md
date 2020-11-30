@@ -10,10 +10,15 @@ Following dendencies needs to be installed for running this bot.
 
 ## Python
 > pip3 install pyhmy
+
 > pip3 install pymongo
+
 > pip3 install python-telegram-bot
+
 > pip3 install telethon
+
 > pip3 install qrcode
+
 > pip3 install Image
 
 ## Need to install hmy binary
