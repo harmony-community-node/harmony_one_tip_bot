@@ -2,7 +2,7 @@ from pyhmy import account, cli
 
 class HmyClient:
 
-    _hmyBinaryDir = '/home/satish/hmydir/hmy'
+    _hmyBinaryDir = './hmydir/hmy'
     _networkUrl = 'https://api.s0.b.hmny.io' #'https://api.s0.t.hmny.io'
     _oneAmountDenominator = 1000000000000000000
 
