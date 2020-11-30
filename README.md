@@ -39,3 +39,20 @@ Please check following link for more detail on Twitter Autohook
 > https://github.com/twitterdev/autohook
 
 > sudo npm install mongoose
+
+## Running the Bot
+> tmux new -s python
+
+> python3 onetipbot.py
+
+> Ctrl-B and D
+
+> tmux new -s node
+
+> node twitter_autohook.js
+
+> Ctrl-B and D
+
+# You can attached to a session to close or run by 
+
+> tmux attach-session -t session-name
