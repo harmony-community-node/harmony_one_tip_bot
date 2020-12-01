@@ -38,6 +38,9 @@ Please check following link for more detail on Twitter Autohook
 
 > https://github.com/twitterdev/autohook
 
+Get Auth token from NGROK
+> https://dashboard.ngrok.com/signup
+
 > sudo npm install mongoose
 
 ## Running the Bot
