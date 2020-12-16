@@ -7,7 +7,9 @@ from time import sleep
 from datastore import DataStore
 from hmyclient import HmyClient
 from utility import Utility
+from utility import GlobalVariables
 import subprocess
+import logging
 
 class TwitterTipBot():
     auth = None
@@ -17,9 +19,11 @@ class TwitterTipBot():
     bot_twitter_handle = "prarysoft"
     dataStore = None
     explorer_url = 'https://explorer.pops.one/#' #'https://explorer.harmony.one/#'
+    
 
     def __init__( self ):
         try:
+            logging.basicConfig(filename=GlobalVariables._logFileName)
             self.auth = OAuthHandler(Secretes._twitterConsumerApiKey, Secretes._twitterConsumerApiSecret)
             self.auth.secure = True
             self.auth.set_access_token(Secretes._twitterAccessToken, Secretes._twitterAccessTokenSecret)

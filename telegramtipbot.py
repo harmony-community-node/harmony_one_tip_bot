@@ -7,7 +7,8 @@ import requests
 from secretes import Secretes
 from datastore import DataStore
 from hmyclient import HmyClient
-from utility import Utility 
+from utility import Utility
+from utility import GlobalVariables
 
 
 
@@ -34,9 +35,11 @@ class OneTipTelegramBot:
     bot_name = "@Dev_One_Tip_Bot"
     twitter_bot_name = "prarysoft" #"OneTipbot"
     twitter_bot_handle = "prarysoft" #"OneTipBot"
+    log_file_name = 'onetippingbot.log'
 
     def __init__(self):
 
+        logging.basicConfig(filename = GlobalVariables._logFileName)
         self.dataStore = DataStore()
 
         #self.client = TelegramClient('ONE_TIP_BOT',
@@ -63,7 +66,8 @@ class OneTipTelegramBot:
 
         
         conv_handler = ConversationHandler(
-        entry_points=[CallbackQueryHandler(self.withdraw, pattern='^withdraw$'), CallbackQueryHandler(self.register_twitter, pattern='^twitter$')],
+        entry_points=[CallbackQueryHandler(self.withdraw, pattern='^withdraw$'), CallbackQueryHandler(self.register_twitter, pattern='^twitter$',)],
+        allow_reentry=True,
         states={
             self.GET_ADDRESS: [
                 MessageHandler(Filters.text, self.get_address),
@@ -90,6 +94,8 @@ class OneTipTelegramBot:
             fallbacks=[MessageHandler(Filters.regex('^start$'), self.send_menu)],
         )
         self.dp.add_handler(conv_handler)
+
+        self.dp.add_error_handler(MessageHandler(Filters.regex('^\U0001f916 Menu$'), self.start))
 
         # Start the Bot
         self.upd.start_polling()
@@ -279,7 +285,8 @@ class OneTipTelegramBot:
             user_details = self.dataStore.getUserDetails(sender.id, sender.username)
             if user_details != None:
                 one_address = user_details['one_address']
-                if HmyClient.getBalance(one_address) + 0.00000021 >= float(text):
+                current_balance = float(HmyClient.getBalance(one_address))
+                if current_balance >= (float(text) + 0.00000021):
                     user_data['amount'] = text
                     user_data['from_address'] = one_address
                     update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer!")
@@ -300,12 +307,16 @@ class OneTipTelegramBot:
         text = update.message.text
 
         if text == "Yes" or text == "Y":
-            res = HmyClient.transfer(user_data['from_address'], user_data['to_address'], user_data['amount'])
-            res = eval(res)
-            if 'transaction-hash' in res:
-                update.message.reply_text(f"Withdraw has been completed. Check here the receipt: {self.explorer_url}/tx/{res['transaction-hash']}")
-            else:
-                update.message.reply_text("Withdraw has failed with an unknown error!")
+            try:
+                res = HmyClient.transfer(user_data['from_address'], user_data['to_address'], user_data['amount'])
+                res = eval(res)
+                if 'transaction-hash' in res:
+                    update.message.reply_text(f"Withdraw has been completed. Check here the receipt: {self.explorer_url}/tx/{res['transaction-hash']}")
+                else:
+                    update.message.reply_text("Withdraw has failed with an unknown error!")
+            except Exception as ex:
+                update.message.reply_text("Withdraw has failed! please try agian later.")
+                print(ex)
         else:
             update.message.reply_text("Withdraw has failed!")
 

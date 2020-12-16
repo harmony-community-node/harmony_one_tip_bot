@@ -31,3 +31,6 @@ class Utility:
             return True
         except:
             return False
+
+class GlobalVariables:
+    _logFileName = 'onetippingbot.log'
