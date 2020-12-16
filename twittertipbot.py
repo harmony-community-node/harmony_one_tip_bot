@@ -61,7 +61,7 @@ class TwitterTipBot():
                     if 'event_id' in twitter_event_details:
                         twitter_event_details['addressed'] = True
                         self.dataStore.saveTwitterEventDetails(twitter_event_details)
-            sleep(10)
+            sleep(3)
 
     # When someone wants to deposit one to his account
     def deposit(self, sender_handle, sender_id):
