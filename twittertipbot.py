@@ -139,7 +139,7 @@ class TwitterTipBot():
             if user_details != None:
                 one_address = user_details['one_address']
                 balance = HmyClient.getBalance(one_address)
-                self.api.send_direct_message(text=f'Your Wallet Balance is: {balance}', recipient_id=sender_id)
+                self.api.send_direct_message(text=f'Your Wallet Balance is: {balance:.6f}', recipient_id=sender_id)
             else:
                 self.api.send_direct_message(text=f'You\'re not registered! Please register using the Telegram bot (https://t.me/onetipbot).i If you are already registered please link you twitter handle.', recipient_id=sender_id)
             # Save the data
@@ -195,9 +195,9 @@ class TwitterTipBot():
                                     # Can't tip more than you have
                                     from_balance = HmyClient.getBalance(from_address)
                                     if tip < GlobalVariables._minimumTip:
-                                        reply_text = f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.8f}'
+                                        reply_text = f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.6f}'
                                     elif tip + 0.00000021 > from_balance:
-                                        reply_text = f'@{sender_handle}, your balance is too low to tip {tip} ONE.'
+                                        reply_text = f'@{sender_handle}, your balance is too low to tip {tip:.6f} ONE.'
                                     else:
                                         receiver_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{receiver}')
                                         if receiver_details == None:
@@ -207,9 +207,9 @@ class TwitterTipBot():
                                                 res = HmyClient.transfer(from_address, receiver_details['one_address'], tip)
                                                 res = eval(res)
                                                 if 'transaction-hash' in res:
-                                                    reply_text = f"Hi @{receiver}, @{sender_handle} just tipped you {tip} ONE."
+                                                    reply_text = f"Hi @{receiver}, @{sender_handle} just tipped you {tip:.6f} ONE."
                                                 else:
-                                                    print(f"Tip failed from {sender} to {receiver} tip {tip} ONE.")
+                                                    print(f"Tip failed from {sender} to {receiver} tip {tip:.6f} ONE.")
                                             else:
                                                 print('Receiver address is missing!')
                                 else:

@@ -173,7 +173,7 @@ class OneTipTelegramBot:
             if user_details != None:
                 one_address = user_details['one_address']
                 balance = HmyClient.getBalance(one_address)
-                context.bot.send_message(text=f'Your Wallet Balance is: \n{balance}', chat_id=self.message.chat.id)
+                context.bot.send_message(text=f'Your Wallet Balance is: \n{balance:.6f}', chat_id=self.message.chat.id)
             else:
                 context.bot.send_message(text='You\'re not registered! Please register to continue.', chat_id=self.message.chat.id)
             # Save the data
@@ -289,10 +289,10 @@ class OneTipTelegramBot:
                 if current_balance >= (float(text) + 0.00000021):
                     user_data['amount'] = text
                     user_data['from_address'] = one_address
-                    update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text}, Please type Yes/Y to confirm, any other input will cancel the transfer!")
+                    update.message.reply_text(f"Transferring {user_data['to_address']} ONE to {text:.6f}, Please type Yes/Y to confirm, any other input will cancel the transfer!")
                     return self.CONFIRM_TRANSFER
                 else:
-                    update.message.reply_text(f"Your current balance is lower than {text}, transfer cancelled!")
+                    update.message.reply_text(f"Your current balance is lower than {text:.6f}, transfer cancelled!")
                     user_data.clear()
                     self.send_menu(update, context)
                     return ConversationHandler.END
@@ -424,9 +424,9 @@ class OneTipTelegramBot:
                         # Can't tip more than you have
                         from_balance = HmyClient.getBalance(from_address)
                         if tip < GlobalVariables._minimumTip:
-                            update.message.reply_text(f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.8f}')
+                            update.message.reply_text(f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.6f}')
                         elif tip + 0.00000021 > from_balance:
-                            update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
+                            update.message.reply_text(f'Sorry, your balance is low! tip {tip:.6f}')
                         else:
                             receiver_details = self.dataStore.getUserDetails(reply.from_user.id, reply.from_user.username)
                             new_account = False
@@ -452,11 +452,11 @@ class OneTipTelegramBot:
                                 res = eval(res)
                                 if 'transaction-hash' in res:
                                     if new_account :
-                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} has tip you {tip}, but seems your account is not active with us yet.\n Please click here {self.bot_name} to initiate your account and check your balance!")
+                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} has tip you {tip:.6f}, but seems your account is not active with us yet.\n Please click here {self.bot_name} to initiate your account and check your balance!")
                                     else:
-                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} just tipped you {tip} ONE")
+                                        update.message.reply_text(f"Hi @{reply.from_user.username}, @{update.message.from_user.username} just tipped you {tip:.6f} ONE")
                                 else:
-                                    print(f"Tip failed from  {update.message.from_user.username} to {reply.from_user.username} tip {tip} ONE")
+                                    print(f"Tip failed from  {update.message.from_user.username} to {reply.from_user.username} tip {tip:.6f} ONE")
                     else:
                         update.message.reply_text('You can\'t tip yourself!')
                 else:
