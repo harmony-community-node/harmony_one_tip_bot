@@ -423,7 +423,9 @@ class OneTipTelegramBot:
                         tip = float(context.args[0])				
                         # Can't tip more than you have
                         from_balance = HmyClient.getBalance(from_address)
-                        if tip + 0.00000021 > from_balance:
+                        if tip < GlobalVariables._minimumTip:
+                            update.message.reply_text(f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.8f}')
+                        elif tip + 0.00000021 > from_balance:
                             update.message.reply_text(f'Sorry, your balance is low! tip {tip}')
                         else:
                             receiver_details = self.dataStore.getUserDetails(reply.from_user.id, reply.from_user.username)

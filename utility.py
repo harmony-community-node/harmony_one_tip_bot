@@ -34,3 +34,4 @@ class Utility:
 
 class GlobalVariables:
     _logFileName = 'onetippingbot.log'
+    _minimumTip = float(0.000021)

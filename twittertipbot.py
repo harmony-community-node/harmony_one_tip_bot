@@ -194,7 +194,9 @@ class TwitterTipBot():
                                 if sender != receiver:                            				
                                     # Can't tip more than you have
                                     from_balance = HmyClient.getBalance(from_address)
-                                    if tip + 0.00000021 > from_balance:
+                                    if tip < GlobalVariables._minimumTip:
+                                        reply_text = f'Sorry, tip should be greater than or equals to {GlobalVariables._minimumTip:.8f}'
+                                    elif tip + 0.00000021 > from_balance:
                                         reply_text = f'@{sender_handle}, your balance is too low to tip {tip} ONE.'
                                     else:
                                         receiver_details = self.dataStore.getUserDetailsByTwitterHandle(f'@{receiver}')
