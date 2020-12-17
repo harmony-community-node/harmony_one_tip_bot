@@ -459,7 +459,8 @@ class OneTipTelegramBot:
                         update.message.reply_text('You can\'t tip yourself!')
                 else:
                     update.message.reply_text('Please reply to a message to tip.')    
-                    
+            else:
+                update.message.reply_text(f'You\'re not registered! Please register with @{self.bot_name} to tip.')
             # This means the message doesn't contain a reply, which is required for the command
         except AttributeError as ae:
             print(ae)
